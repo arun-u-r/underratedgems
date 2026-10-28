@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UR — The Thoughtful Edit
 
-## Getting Started
+UR is an affiliate product discovery website. Visitors can explore curated
+recommendations and follow links to participating retailers. UR does not
+process payments or fulfill orders.
 
-First, run the development server:
+## Features
+
+- Responsive editorial storefront with product, category, collection, search,
+  contact, legal, and affiliate disclosure pages.
+- MongoDB-backed catalog, featured homepage content, settings, and contact
+  inbox.
+- Protected administrator dashboard for products, categories, collections,
+  site settings, contact messages, and click analytics.
+- Server-side affiliate URL allowlisting and click redirects.
+- Signed Cloudinary uploads; Cloudinary credentials are used only on the
+  server.
+- Initial admin bootstrap and clearly labeled, unpublished demo seed data.
+
+## Requirements and configuration
+
+- Node.js 20.19+ (Node 24 recommended) and pnpm.
+- MongoDB connection string.
+- A random `SESSION_SECRET` with at least 32 characters.
+- Cloudinary account credentials for image uploads.
+- Public production site URL for metadata and sitemap generation.
+- Retailer affiliate accounts and compliant affiliate links before products are
+  published.
+
+Copy `.env.example` to `.env.local` and replace every placeholder. Do not commit
+`.env.local` or production credentials. `AFFILIATE_ALLOWED_HOSTS` accepts a
+comma-separated list of retailer hosts; default allowlisting is
+`amazon.com,amazon.in,meesho.com`. The app rejects affiliate links outside this
+allowlist.
+
+## Local setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). MongoDB is required for
+catalog, admin, contact, and analytics functionality. Without it, those
+integrations report service/configuration errors; the app does not pretend to
+use a live or mock catalog.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create the first admin user after setting `MONGODB_URI`, `ADMIN_EMAIL`, and
+`ADMIN_PASSWORD`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm admin:bootstrap
+```
 
-## Learn More
+The bootstrap command only creates the initial admin and refuses to overwrite
+an existing account. The demo seed is optional and creates only unpublished
+categories/products and an unpublished collection:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm seed
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Replace demo content and verify retailer links, image rights, prices, claims,
+and disclosures before publishing. No reviews or product endorsements are
+fabricated by the seed.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Validation and production
 
-## Deploy on Vercel
+```bash
+pnpm lint
+pnpm test
+pnpm build
+pnpm start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Deploy to a supported Next.js host (for example, Vercel) with all server
+environment variables configured. Set `NEXT_PUBLIC_SITE_URL` to the exact
+canonical HTTPS origin. Configure MongoDB network access and Cloudinary
+credentials for the deployment environment. Bootstrap the first administrator
+against the production database from a trusted environment, then remove or
+rotate bootstrap credentials from the deployment environment.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Before launch, verify:
+
+1. Admin login, session expiry, logout, protected routes, and CRUD operations.
+2. Cloudinary upload, image reorder/removal, and image cleanup behavior.
+3. Contact submission and expiry policy, plus the admin inbox.
+4. Affiliate redirects for every configured retailer and click analytics.
+5. Homepage featured content, settings, SEO metadata, sitemap, and robots.
+6. Desktop and mobile layouts, keyboard navigation, focus behavior, and
+   horizontal overflow.
+7. Legal content and affiliate disclosures for each retailer and jurisdiction.
+
+Live database and Cloudinary integrations require credentials and have not
+been verified against external services in a credential-free workspace.
